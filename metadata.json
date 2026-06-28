@@ -1,0 +1,6 @@
+{
+  "name": "Noor-e-Kalaam",
+  "description": "Noor-e-Kalaam, Har Dil Ke Naam - The most beautiful offline-first Bible app for Pakistan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Glowing Background Medallion (Gold Ring / Sunburst) -->
+    <path
+        android:fillColor="#15D4AF37"
+        android:pathData="M54,54m-38,0a38,38 0 1,1 76,0a38,38 0 1,1 -76,0" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M54,54m-30,0a30,30 0 1,1 60,0a30,30 0 1,1 -60,0"
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="1.5" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M54,54m-33,0a33,33 0 1,1 66,0a33,33 0 1,1 -66,0"
+        android:strokeColor="#33D4AF37"
+        android:strokeWidth="0.8"
+        android:strokeLineJoin="round" />
+
+    <!-- Elegant Islamic Arch Frame -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M54,16 C30,28 34,58 34,80 L74,80 C74,58 78,28 54,16 Z"
+        android:strokeColor="#66E6F4EA"
+        android:strokeWidth="1.2" />
+
+    <!-- Stylized Urdu Calligraphy for "نور" (Noor) -->
+    <!-- 'ر' (Reh) - Left stroke sweeping down-left -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M 43,51 C 41,55 37,63 32,65"
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+
+    <!-- 'و' (Waw) - Middle loop and tail -->
+    <!-- Loop -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M 50,47 C 48,45 46,47 46,49 C 46,52 49,53 52,50 C 53,49 52,48 50,47 Z" />
+    <!-- Tail -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M 50,50 C 49,53 46,61 41,64"
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+
+    <!-- 'ن' (Noon) - Large bowl sweeping on the right -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M 72,46 C 72,62 64,68 56,68 C 52,68 49,66 49,63"
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+    <!-- Noon's Dot (Nuqta) - Elegant diamond shape above -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M 62,38 L 65,41 L 62,44 L 59,41 Z" />
+
+    <!-- Small decorative holy cross/star inside the halo to represent spiritual light -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M 54,28 L 55,30 L 57,31 L 55,32 L 54,34 L 53,32 L 51,31 L 53,30 Z" />
+
+</vector>
