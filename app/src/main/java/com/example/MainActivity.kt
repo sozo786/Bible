@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ui.MainNavigationContainer
+import com.example.ui.MainNavigationConainer
 import com.example.viewmodel.BibleViewModel
 
 class MainActivity : ComponentActivity() {
