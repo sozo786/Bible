@@ -16,7 +16,6 @@ enum class TranslationMode { ENGLISH, URDU, BOTH }
 
 class BibleViewModel(application: Application) : AndroidViewModel(application) {
     
-    // UI States - Ye sab UI me use ho rahe hain
     var isLoading by mutableStateOf(true)
         private set
     var books by mutableStateOf<List<Book>>(emptyList())
@@ -24,7 +23,6 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     var errorMessage by mutableStateOf<String?>(null)
         private set
     
-    // Settings - UI inko dhoond raha tha
     var isDarkMode by mutableStateOf(false)
         private set
     var fontSize by mutableStateOf(16f)
@@ -36,97 +34,79 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         loadBible()
     }
     
-    // Functions - UI inko call kar raha tha
-    fun toggleDarkMode() {
-        isDarkMode = !isDarkMode
-    }
-    
-    fun updateFontSize(newSize: Float) {
-        fontSize = newSize
-    }
-    
-    fun updateTranslationMode(mode: TranslationMode) {
-        translationMode = mode
-    }
+    fun toggleDarkMode() { isDarkMode = !isDarkMode }
+    fun updateFontSize(newSize: Float) { fontSize = newSize }
+    fun updateTranslationMode(mode: TranslationMode) { translationMode = mode }
     
     private fun loadBible() {
         viewModelScope.launch {
             try {
                 isLoading = true
                 errorMessage = null
-                Log.d("SOZO", "Loading Bible...")
+                Log.d("SOZO", "Loading REAL Bible from assets...")
                 
                 val loadedBooks = withContext(Dispatchers.IO) {
                     val context = getApplication<Application>()
                     
+                    // YE LINES SAB SE IMPORTANT HAIN - REAL FILES READ KAR RAHI HAIN
+                    Log.d("SOZO", "Opening bible_kjv.json from assets")
                     val kjvText = context.assets.open("bible_kjv.json").bufferedReader().use { it.readText() }
-                    val kjvJson = JSONObject(kjvText)
                     
+                    Log.d("SOZO", "Opening bible_urdu.json from assets")
                     val ugvText = context.assets.open("bible_urdu.json").bufferedReader().use { it.readText() }
+                    
+                    Log.d("SOZO", "Parsing 31,102 verses... This will take 5-8 seconds")
+                    val kjvJson = JSONObject(kjvText)
                     val ugvJson = JSONObject(ugvText)
                     
-                    Log.d("SOZO", "Parsing 31k verses...")
-                    mergeBibles(kjvJson, ugvJson)
+                    val result = mutableListOf<Book>()
+                    val kjvBooks = kjvJson.getJSONArray("books")
+                    val ugvBooks = ugvJson.getJSONArray("books")
+                    
+                    for (i in 0 until kjvBooks.length()) {
+                        val kjvBook = kjvBooks.getJSONObject(i)
+                        val ugvBook = ugvBooks.getJSONObject(i)
+                        val chapters = mutableListOf<Chapter>()
+                        
+                        val kjvChaps = kjvBook.getJSONArray("chapters")
+                        val ugvChaps = ugvBook.getJSONArray("chapters")
+                        
+                        for (j in 0 until kjvChaps.length()) {
+                            val kjvChap = kjvChaps.getJSONObject(j)
+                            val ugvChap = ugvChaps.getJSONObject(j)
+                            val verses = mutableListOf<Verse>()
+                            
+                            val kjvVers = kjvChap.getJSONArray("verses")
+                            val ugvVers = ugvChap.getJSONArray("verses")
+                            
+                            for (k in 0 until kjvVers.length()) {
+                                verses.add(Verse(
+                                    kjvVers.getJSONObject(k).getInt("v"),
+                                    kjvVers.getJSONObject(k).getString("en"),
+                                    ugvVers.getJSONObject(k).getString("ur")
+                                ))
+                            }
+                            chapters.add(Chapter(kjvChap.getInt("chapter"), verses))
+                        }
+                        result.add(Book(kjvBook.getString("name"), chapters))
+                        Log.d("SOZO", "Loaded: ${kjvBook.getString("name")} - ${chapters.size} chapters")
+                    }
+                    result
                 }
                 
                 books = loadedBooks
                 isLoading = false
-                Log.d("SOZO", "DONE! Loaded ${books.size} books")
+                Log.d("SOZO", "SUCCESS! Total books loaded: ${books.size}")
                 
             } catch (e: Exception) {
-                Log.e("SOZO", "FAILED", e)
-                errorMessage = "Error: ${e.message}"
+                Log.e("SOZO", "FAILED TO LOAD BIBLE", e)
+                errorMessage = "Failed: ${e.message}"
                 isLoading = false
             }
         }
     }
-    
-    private fun mergeBibles(kjvJson: JSONObject, ugvJson: JSONObject): List<Book> {
-        val bookList = mutableListOf<Book>()
-        val kjvBooks = kjvJson.getJSONArray("books")
-        val ugvBooks = ugvJson.getJSONArray("books")
-        
-        for (i in 0 until kjvBooks.length()) {
-            val kjvBook = kjvBooks.getJSONObject(i)
-            val ugvBook = ugvBooks.getJSONObject(i)
-            
-            val bookName = kjvBook.getString("name")
-            val kjvChapters = kjvBook.getJSONArray("chapters")
-            val ugvChapters = ugvBook.getJSONArray("chapters")
-            
-            val chapterList = mutableListOf<Chapter>()
-            
-            for (j in 0 until kjvChapters.length()) {
-                val kjvChapter = kjvChapters.getJSONObject(j)
-                val ugvChapter = ugvChapters.getJSONObject(j)
-                
-                val chapterNum = kjvChapter.getInt("chapter")
-                val kjvVerses = kjvChapter.getJSONArray("verses")
-                val ugvVerses = ugvChapter.getJSONArray("verses")
-                
-                val verseList = mutableListOf<Verse>()
-                
-                for (k in 0 until kjvVerses.length()) {
-                    val kjvVerse = kjvVerses.getJSONObject(k)
-                    val ugvVerse = ugvVerses.getJSONObject(k)
-                    
-                    verseList.add(
-                        Verse(
-                            number = kjvVerse.getInt("v"),
-                            english = kjvVerse.getString("en"),
-                            urdu = ugvVerse.getString("ur")
-                        )
-                    )
-                }
-                chapterList.add(Chapter(chapterNum, verseList))
-            }
-            bookList.add(Book(bookName, chapterList))
-        }
-        return bookList
-    }
 }
 
-// Data Classes
 data class Book(val name: String, val chapters: List<Chapter>)
 data class Chapter(val number: Int, val verses: List<Verse>)  
 data class Verse(val number: Int, val english: String, val urdu: String)
