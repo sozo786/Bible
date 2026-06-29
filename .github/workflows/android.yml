@@ -19,14 +19,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Delete corrupt Gradle Wrapper JAR
+      - name: Delete old Gradle Wrapper
         run: rm -rf gradle/wrapper/gradle-wrapper.jar
 
-      - name: Setup Gradle 8.5
+      - name: Setup Gradle 9.3.1
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 8.5
-          validate-wrappers: false  # <-- Ye line add karni thi
+          gradle-version: 9.3.1  # <-- 8.5 se 9.3.1 kar diya
+          validate-wrappers: false
 
       - name: Build Debug APK
         run: gradle assembleDebug --no-daemon --stacktrace
