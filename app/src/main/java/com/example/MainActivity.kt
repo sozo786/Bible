@@ -3,18 +3,28 @@ package com.example
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ui.MainNavigationConainer
-import com.example.viewmodel.BibleViewModel
+import com.example.ui.BibleApp
+import com.example.ui.BibleViewModel
+import com.example.ui.theme.NoorEKalaamTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            val viewModel: BibleViewModel = viewModel()
-            MainNavigationContainer(viewModel = viewModel)
+            val bibleViewModel: BibleViewModel = viewModel()
+            NoorEKalaamTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    BibleApp(bibleViewModel = bibleViewModel)
+                }
+            }
         }
     }
 }
