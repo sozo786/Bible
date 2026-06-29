@@ -67,68 +67,109 @@ fun MainNavigationContainer(viewModel: BibleViewModel) {
     var currentScreen by remember { mutableStateOf(Screen.Splash) }
     val haptic = LocalHapticFeedback.current
 
+    // Load files once using LaunchedEffect
+    LaunchedEffect(Unit) {
+        viewModel.loadBible()
+    }
+
     MyApplicationTheme(darkTheme = isDark) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            when (currentScreen) {
-                Screen.Splash -> {
-                    SplashScreen(
-                        onSplashFinished = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            currentScreen = if (isOnboardingCompleted) Screen.Home else Screen.Onboarding
-                        }
-                    )
-                }
-                Screen.Onboarding -> {
-                    OnboardingScreen(
-                        onOnboardingComplete = {
-                            viewModel.completeOnboarding()
-                            currentScreen = Screen.Home
-                        }
-                    )
-                }
-                else -> {
-                    // Core app layout with custom navigation bottom bar
-                    Scaffold(
-                        bottomBar = {
-                            CustomBottomNavigation(
-                                currentScreen = currentScreen,
-                                onNavigate = { screen ->
-                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    currentScreen = screen
-                                }
+            if (!isInitialized) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(if (isDark) DarkBackground else Color.White),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(24.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            color = EmeraldPrimary,
+                            strokeWidth = 4.dp,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Noor-e-Kalaam",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                color = GoldSecondary,
+                                fontWeight = FontWeight.Bold
                             )
-                        },
-                        contentWindowInsets = WindowInsets.navigationBars
-                    ) { paddingValues ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues)
-                        ) {
-                            AnimatedContent(
-                                targetState = currentScreen,
-                                transitionSpec = {
-                                    fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(220))
-                                },
-                                label = "ScreenTransition"
-                            ) { target ->
-                                when (target) {
-                                    Screen.Home -> HomeScreen(
-                                        viewModel = viewModel,
-                                        onOpenBook = { currentScreen = Screen.Reading },
-                                        onNavigateToSearch = { currentScreen = Screen.Search }
-                                    )
-                                    Screen.Reading -> ReadingScreen(viewModel = viewModel)
-                                    Screen.Search -> SearchScreen(viewModel = viewModel)
-                                    Screen.Bookmarks -> BookmarksScreen(
-                                        viewModel = viewModel,
-                                        onOpenBookmark = { currentScreen = Screen.Reading }
-                                    )
-                                    Screen.Settings -> SettingsScreen(viewModel = viewModel)
-                                    else -> {}
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Loading sacred scriptures...",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = if (isDark) Color.LightGray else Color.DarkGray
+                            )
+                        )
+                    }
+                }
+            } else {
+                when (currentScreen) {
+                    Screen.Splash -> {
+                        SplashScreen(
+                            onSplashFinished = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                currentScreen = if (isOnboardingCompleted) Screen.Home else Screen.Onboarding
+                            }
+                        )
+                    }
+                    Screen.Onboarding -> {
+                        OnboardingScreen(
+                            onOnboardingComplete = {
+                                viewModel.completeOnboarding()
+                                currentScreen = Screen.Home
+                            }
+                        )
+                    }
+                    else -> {
+                        // Core app layout with custom navigation bottom bar
+                        Scaffold(
+                            bottomBar = {
+                                CustomBottomNavigation(
+                                    currentScreen = currentScreen,
+                                    onNavigate = { screen ->
+                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        currentScreen = screen
+                                    }
+                                )
+                            },
+                            contentWindowInsets = WindowInsets.navigationBars
+                        ) { paddingValues ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(paddingValues)
+                            ) {
+                                AnimatedContent(
+                                    targetState = currentScreen,
+                                    transitionSpec = {
+                                        fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(220))
+                                    },
+                                    label = "ScreenTransition"
+                                ) { target ->
+                                    when (target) {
+                                        Screen.Home -> HomeScreen(
+                                            viewModel = viewModel,
+                                            onOpenBook = { currentScreen = Screen.Reading },
+                                            onNavigateToSearch = { currentScreen = Screen.Search }
+                                        )
+                                        Screen.Reading -> ReadingScreen(viewModel = viewModel)
+                                        Screen.Search -> SearchScreen(viewModel = viewModel)
+                                        Screen.Bookmarks -> BookmarksScreen(
+                                            viewModel = viewModel,
+                                            onOpenBookmark = { currentScreen = Screen.Reading }
+                                        )
+                                        Screen.Settings -> SettingsScreen(viewModel = viewModel)
+                                        else -> {}
+                                    }
                                 }
                             }
                         }
@@ -240,17 +281,6 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
                 modifier = Modifier.testTag("splash_title")
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = "Presented by SOZO",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    color = GoldSecondary.copy(alpha = 0.8f),
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-            )
-
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
@@ -260,6 +290,31 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
                     textAlign = TextAlign.Center
                 ),
                 modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 48.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "from",
+                style = MaterialTheme.typography.labelLarge.copy(
+                    color = GoldSecondary.copy(alpha = 0.5f),
+                    letterSpacing = 1.sp
+                )
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "SOZO",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = GoldSecondary,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.sp
+                )
             )
         }
     }
@@ -1217,13 +1272,12 @@ fun VerseItemRow(
 
         // Verse Texts (Urdu and English with responsive layout sizes)
         Column(modifier = Modifier.weight(1f)) {
-            if (translationMode == "both" || translationMode == "urdu") {
+            if (translationMode == "both" || translationMode == "english") {
                 Text(
-                    text = verse.textUrdu,
-                    style = getUrduTextStyle(fontSize).copy(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Right,
-                        textDirection = TextDirection.Rtl
+                    text = verse.textEnglish,
+                    style = getEnglishTextStyle(fontSize - 2f).copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Left
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -1233,12 +1287,13 @@ fun VerseItemRow(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            if (translationMode == "both" || translationMode == "english") {
+            if (translationMode == "both" || translationMode == "urdu") {
                 Text(
-                    text = verse.textEnglish,
-                    style = getEnglishTextStyle(fontSize - 2f).copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Left
+                    text = verse.textUrdu,
+                    style = getUrduTextStyle(fontSize).copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Right,
+                        textDirection = TextDirection.Rtl
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )

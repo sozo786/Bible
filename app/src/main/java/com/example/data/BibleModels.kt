@@ -97,15 +97,7 @@ object BibleData {
     }
 }
 
-// JSON parsing container models
-data class JsonVerseList(
-    val books: List<JsonBook>
-)
-
-data class JsonBook(
-    val name: String,
-    val chapters: List<List<String>>
-)
+enum class BibleMode { ENGLISH, URDU, BOTH }
 
 // Active reading models for the UI
 data class Verse(

@@ -39,6 +39,16 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     private val _translationMode = MutableStateFlow(settings.translationMode) // "urdu", "english", "both"
     val translationMode: StateFlow<String> = _translationMode.asStateFlow()
 
+    val bibleMode: StateFlow<BibleMode> = _translationMode
+        .map { mode ->
+            when (mode.lowercase()) {
+                "english" -> BibleMode.ENGLISH
+                "urdu" -> BibleMode.URDU
+                else -> BibleMode.BOTH
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), BibleMode.BOTH)
+
     private val _isOnboardingCompleted = MutableStateFlow(settings.isOnboardingCompleted)
     val isOnboardingCompleted: StateFlow<Boolean> = _isOnboardingCompleted.asStateFlow()
 
@@ -79,8 +89,12 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), defaultVerseOfTheDay())
 
     init {
+        // Controlled via LaunchedEffect in the UI on app start
+    }
+
+    fun loadBible() {
+        if (_isInitialized.value) return
         viewModelScope.launch {
-            // Load Bible assets on background thread
             repository.initialize()
             _isInitialized.value = true
             loadCurrentVerses()
@@ -145,6 +159,15 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
             settings.translationMode = mode
             _translationMode.value = mode
         }
+    }
+
+    fun updateBibleMode(mode: BibleMode) {
+        val modeStr = when (mode) {
+            BibleMode.ENGLISH -> "english"
+            BibleMode.URDU -> "urdu"
+            BibleMode.BOTH -> "both"
+        }
+        updateTranslationMode(modeStr)
     }
 
     fun completeOnboarding() {
