@@ -19,14 +19,17 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Delete old Gradle Wrapper
-        run: rm -rf gradle/wrapper/gradle-wrapper.jar
+      - name: Generate Debug Keystore
+        run: |
+          keytool -genkeypair -v -keystore debug.keystore -alias androiddebugkey \
+          -keyalg RSA -keysize 2048 -validity 10000 \
+          -dname "CN=Android Debug,O=Android,C=US" \
+          -storepass android -keypass android
 
       - name: Setup Gradle 9.3.1
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 9.3.1  # <-- 8.5 se 9.3.1 kar diya
-          validate-wrappers: false
+          gradle-version: 9.3.1
 
       - name: Build Debug APK
         run: gradle assembleDebug --no-daemon --stacktrace
